@@ -13,7 +13,9 @@ def register_new_user(data):
         user_obj = Custom_Users.objects.create(
             username=data['roll_no'],
             role=data['role'],
-            name=data['first_name'] + data['last_name']
+            name=data['first_name'] + data['last_name'],
+            first_name=data['first_name'],
+            last_name=data['last_name']
         )
         user_obj.set_password(data['password'])
         user_obj.save()

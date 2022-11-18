@@ -7,16 +7,17 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
 from custom_users.services import register_new_user, all_fields, register_alumni_user, generating_all_fields_for_alumni
 from custom_users.serializers import Custom_Users_Serializers, Register_User_Serializer, Profile_Serializers, \
-    User_Search_Serializers, Post_Saving_Serializers, Register_Alumni_Serializers, Alumni_Serializers
+    User_Search_Serializers, Post_Saving_Serializers, Register_Alumni_Serializers, Alumni_Serializers, \
+    Single_User_Search_Serializers
 from custom_users.models import Custom_Users
 
 
 # Create your views here.
 
 
-class Register_User_Api(APIView):
+class Student_Register(APIView):
     """
-    Register New User
+    Register New Student
     """
 
     def post(self, request):
@@ -36,8 +37,9 @@ class Register_User_Api(APIView):
 
 class Student_Login_Api(APIView):
     """
-    Login User
+    Student Login
     """
+
     def post(self, request):
         try:
             data = request.data
@@ -122,6 +124,7 @@ class Alumni_Login_Api(APIView):
     """
     Login Alumni
     """
+
     def post(self, request):
         try:
             data = request.data
@@ -164,4 +167,20 @@ class Post_Saving(APIView):
             'data': serializer.data,
         },
             status=status.HTTP_201_CREATED
+        )
+
+
+class Get_Single_User(APIView):
+    """
+        Single User Searching
+    """
+    authentication_classes = [JWTAuthentication]
+
+    def get(self, request, pk):
+        obj = Custom_Users.objects.get(id=pk)
+        serializer = Single_User_Search_Serializers(obj, many=False)
+        return response.Response({
+            'data': serializer.data,
+        },
+            status=status.HTTP_200_OK
         )

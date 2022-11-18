@@ -73,3 +73,8 @@ class Post_Saving_Serializers(serializers.ModelSerializer):
         post_instance = Post.objects.create(custom_users=user, **validated_data)
         return post_instance
 
+
+class Single_User_Search_Serializers(serializers.ModelSerializer):
+    class Meta:
+        model = Custom_Users
+        fields = '__all__'

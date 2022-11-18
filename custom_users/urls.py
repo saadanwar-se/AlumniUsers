@@ -6,9 +6,11 @@ from django.conf.urls.static import static
 urlpatterns = [
                   path('login/', views.Student_Login_Api.as_view(), name='user_login'),
                   path('loginalumni/', views.Alumni_Login_Api.as_view(), name='user_login'),
-                  path('register/', views.Register_User_Api.as_view(), name='user_registration'),
+                  path('register/', views.Student_Register.as_view(), name='student_registration'),
                   path('profile/<str:pk>/', views.Student_Profile_Api.as_view(), name='user_making_profile'),
                   path('name/', views.Users_Search_List.as_view(), name='users_searching'),
                   path('registeralumni/', views.Register_Alumni_Api.as_view(), name='alumni_registration'),
-                  path('post/', views.Post_Saving.as_view(), name='post_saving')
+                  path('post/', views.Post_Saving.as_view(), name='post_saving'),
+                  path('getuser/<str:pk>/', views.Get_Single_User.as_view(), name='search-single-user')
+
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
