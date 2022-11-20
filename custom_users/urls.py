@@ -11,6 +11,12 @@ urlpatterns = [
                   path('name/', views.Users_Search_List.as_view(), name='users_searching'),
                   path('registeralumni/', views.Register_Alumni_Api.as_view(), name='alumni_registration'),
                   path('post/', views.Post_Saving.as_view(), name='post_saving'),
-                  path('getuser/<str:pk>/', views.Get_Single_User.as_view(), name='search-single-user')
+                  path('getuser/<str:pk>/', views.Get_Single_User.as_view(), name='search_single_user'),
+                  path('sachievements/', views.Save_Alumni_Achievements.as_view(), name='save_alumni_achievements'),
+                  path('gachievements/', views.Get_Alumni_Achievements.as_view(), name='get_alumni_achievements'),
+                  path('sannouncements/', views.Save_Announcments.as_view(), name='save_announcements'),
+                  path('gannouncements/', views.Get_Announcments.as_view(), name='get_announcements'),
+                  path('teacherregister/', views.Register_Teacher.as_view(), name='teacher_registration'),
+                  path('teacherlogin/', views.Teacher_Login_Api.as_view(), name='teacher_registration'),
 
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.fields import CurrentUserDefault
 
-from custom_users.models import Custom_Users, Post
+from custom_users.models import Custom_Users, Post, AlumniData, Announcements
 
 
 class Custom_Users_Serializers(serializers.Serializer):
@@ -14,11 +14,8 @@ class Post_Saving_User(serializers.ModelSerializer):
         model = Custom_Users
         fields = '__all__'
 
-    # def is_valid(self, raise_exception=False):
-    #     return "s"
 
-
-class Alumni_Serializers(serializers.Serializer):
+class Alumni_Teacher_Login_Serializers(serializers.Serializer):
     uuid = serializers.CharField()
     password = serializers.CharField()
 
@@ -43,7 +40,7 @@ class User_Search_Serializers(serializers.ModelSerializer):
         exclude = ('password',)
 
 
-class Register_Alumni_Serializers(serializers.ModelSerializer):
+class Registeratrion_Alumni_Teacher_Serializers(serializers.ModelSerializer):
     class Meta:
         model = Custom_Users
         fields = '__all__'
@@ -57,6 +54,7 @@ class CustomUserSerializers(serializers.ModelSerializer):
 
 class Post_Saving_Serializers(serializers.ModelSerializer):
     custom_users = CustomUserSerializers(read_only=True)
+
     # user_name = serializers.SerializerMethodField()
 
     # def get_user_name(self, obj):
@@ -77,4 +75,16 @@ class Post_Saving_Serializers(serializers.ModelSerializer):
 class Single_User_Search_Serializers(serializers.ModelSerializer):
     class Meta:
         model = Custom_Users
+        fields = '__all__'
+
+
+class Get_Alumni_Achievements_Serializers(serializers.ModelSerializer):
+    class Meta:
+        model = AlumniData
+        fields = '__all__'
+
+
+class Get_Announcements(serializers.ModelSerializer):
+    class Meta:
+        model = Announcements
         fields = '__all__'

@@ -2,14 +2,16 @@ from django.contrib.auth import authenticate
 from rest_framework import response, status
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import ListAPIView
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
-from custom_users.services import register_new_user, all_fields, register_alumni_user, generating_all_fields_for_alumni
+from custom_users.services import register_new_user, all_fields, register_alumni_user, generating_all_fields_for_alumni, \
+    register_teacher
 from custom_users.serializers import Custom_Users_Serializers, Register_User_Serializer, Profile_Serializers, \
-    User_Search_Serializers, Post_Saving_Serializers, Register_Alumni_Serializers, Alumni_Serializers, \
-    Single_User_Search_Serializers
-from custom_users.models import Custom_Users
+    User_Search_Serializers, Post_Saving_Serializers, Registeratrion_Alumni_Teacher_Serializers, Alumni_Teacher_Login_Serializers, \
+    Single_User_Search_Serializers, Get_Alumni_Achievements_Serializers, Get_Announcements
+from custom_users.models import Custom_Users, AlumniData, Announcements
 
 
 # Create your views here.
@@ -69,7 +71,7 @@ class Student_Login_Api(APIView):
 
 class Student_Profile_Api(APIView):
     """
-        Updating Registered User
+        Updating Registered Student
     """
     authentication_classes = [JWTAuthentication]
 
@@ -106,9 +108,8 @@ class Register_Alumni_Api(APIView):
 
     def post(self, request):
         try:
-            data = request
             data = request.data
-            serializer = Register_Alumni_Serializers(data=data)
+            serializer = Registeratrion_Alumni_Teacher_Serializers(data=data)
             if serializer.is_valid(raise_exception=True):
                 data = register_alumni_user(serializer.validated_data)
                 return data
@@ -128,7 +129,7 @@ class Alumni_Login_Api(APIView):
     def post(self, request):
         try:
             data = request.data
-            serializer = Alumni_Serializers(data=data)
+            serializer = Alumni_Teacher_Login_Serializers(data=data)
             if serializer.is_valid(raise_exception=True):
                 uuid = serializer.validated_data['uuid']
                 password = serializer.validated_data['password']
@@ -157,17 +158,25 @@ class Post_Saving(APIView):
     Saving the POSTS
     """
     authentication_classes = [JWTAuthentication]
+    parser_classes = [FormParser, MultiPartParser]
 
-    def post(self, request):
-        data = request.data
-        serializer = Post_Saving_Serializers(data=data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return response.Response({
-            'data': serializer.data,
-        },
-            status=status.HTTP_201_CREATED
-        )
+    def post(self, request, format=None):
+        try:
+            data = request.data
+            serializer = Post_Saving_Serializers(data=data, context={'request': request})
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return response.Response({
+                'data': serializer.data,
+            },
+                status=status.HTTP_201_CREATED
+            )
+
+        except Exception as e:
+            return response.Response(
+                data={'error': e},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class Get_Single_User(APIView):
@@ -184,3 +193,105 @@ class Get_Single_User(APIView):
         },
             status=status.HTTP_200_OK
         )
+
+
+class Save_Alumni_Achievements(APIView):
+    """
+    Saviing the acheivements of an alumni
+    """
+
+    def post(self, request):
+        serializer = Get_Alumni_Achievements_Serializers(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return response.Response(
+                data={
+                    'message': 'Alumni achievements has been registered successfully.',
+                },
+                status=status.HTTP_201_CREATED
+            )
+
+
+class Get_Alumni_Achievements(ListAPIView):
+    """
+    Getting the acheivements of all alumni's
+    """
+    queryset = AlumniData.objects.all()
+    serializer_class = Get_Alumni_Achievements_Serializers
+
+
+class Save_Announcments(APIView):
+    """
+    Saviing the announcments
+    """
+
+    def post(self, request):
+        serializer = Get_Announcements(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return response.Response(
+                data={
+                    'message': 'Announcements has been registered successfully.',
+                },
+                status=status.HTTP_201_CREATED
+            )
+
+
+class Get_Announcments(ListAPIView):
+    """
+    Getting all the announcements
+    """
+    queryset = Announcements.objects.all()
+    serializer_class = Get_Announcements
+
+
+class Register_Teacher(APIView):
+    """
+        Registering the Teachers
+    """
+
+    def post(self, request):
+        try:
+            data = request.data
+            serializer = Registeratrion_Alumni_Teacher_Serializers(data=data)
+            if serializer.is_valid(raise_exception=True):
+                data = register_teacher(serializer.validated_data)
+                return data
+
+        except Exception as e:
+            return response.Response(
+                data={'error': e},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+
+class Teacher_Login_Api(APIView):
+    """
+    Teacher Login
+    """
+
+    def post(self, request):
+        try:
+            data = request.data
+            serializer = Alumni_Teacher_Login_Serializers(data=data)
+            if serializer.is_valid(raise_exception=True):
+                uuid = serializer.validated_data['uuid']
+                password = serializer.validated_data['password']
+                teacher = authenticate(username=uuid, password=password)
+                data = generating_all_fields_for_alumni(teacher)
+                refresh_token = RefreshToken.for_user(teacher)
+                token = str(refresh_token.access_token)
+                refresh_token = str(refresh_token)
+
+                return response.Response({
+                    'token': token,
+                    'refresh_token': refresh_token,
+                    'data': data,
+                },
+                    status=status.HTTP_200_OK
+                )
+        except:
+            return response.Response(
+                {'message': "Invalid credentials"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )

@@ -1,5 +1,3 @@
-import uuid as uuid
-from django.contrib.auth.base_user import BaseUserManager
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
@@ -39,3 +37,15 @@ class Post(models.Model):
     picture = models.ImageField(upload_to="my_picture")
     title = models.CharField(max_length=256)
     description = models.CharField(max_length=256)
+
+
+class AlumniData(models.Model):
+    picture = models.ImageField(upload_to="my_picture")
+    name = models.CharField(max_length=255)
+    achievements = models.CharField(max_length=255)
+
+
+class Announcements(models.Model):
+    date = models.CharField(max_length=255)
+    title = models.CharField(max_length=255)
+    description = models.CharField(max_length=255)

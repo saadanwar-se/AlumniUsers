@@ -104,6 +104,49 @@ def register_alumni_user(data):
     )
 
 
+def register_teacher(data):
+    """
+    Register New Teacher
+    """
+    returing_dict = generating_dict_for_teacher(data)
+    user_obj = Custom_Users.objects.create(**returing_dict)
+    user_obj.set_password(data['password'])
+    user_obj.save()
+    return response.Response(
+        data={
+            'message': 'Teacher has been registered successfully.',
+            'data': returing_dict,
+        },
+        status=status.HTTP_201_CREATED
+    )
+
+
+def generating_dict_for_teacher(data):
+    """
+    :param data: 
+    :return: dictionary for teacher registration and returning to the front-end  
+    """""
+    dict_for_alumni = {
+        "name": data['first_name'] + data['last_name'],
+        "username": generating_uuid(),
+        "first_name": data['first_name'],
+        "last_name": data['last_name'],
+        "email": data['email'],
+        "short_intro": data['short_intro'],
+        "bio": data['bio'],
+        "social_github": data['social_github'],
+        "social_linkedin": data['social_linkedin'],
+        "social_twitter": data['social_twitter'],
+        "social_youtube": data['social_youtube'],
+        "social_website": data['social_website'],
+        "company_name": data['company_name'],
+        "designation": data['designation'],
+        "is_teacher": data['is_teacher'],
+        "role": data['role']
+    }
+    return dict_for_alumni
+
+
 def generating_all_fields_for_alumni(alumni):
     """
     Returning All Fields Of Login User
@@ -122,5 +165,27 @@ def generating_all_fields_for_alumni(alumni):
         "social_website": alumni.social_website,
         "role": alumni.role,
         "is_alumni": alumni.is_alumni,
+    }
+    return data
+
+
+def generating_all_fields_for_teacher(teacher):
+    """
+    Returning All Fields Of Login Teacher
+    """
+    data = {
+        "uuid": teacher.username,
+        "first_name": teacher.first_name,
+        "last_name": teacher.last_name,
+        "email": teacher.email,
+        "short_intro": teacher.short_intro,
+        "bio": teacher.bio,
+        "social_github": teacher.social_github,
+        "social_linkedin": teacher.social_linkedin,
+        "social_twitter": teacher.social_twitter,
+        "social_youtube": teacher.social_youtube,
+        "social_website": teacher.social_website,
+        "role": teacher.role,
+        "is_teacher": teacher.is_teacher,
     }
     return data
