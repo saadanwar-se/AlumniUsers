@@ -52,24 +52,10 @@ class CustomUserSerializers(serializers.ModelSerializer):
         fields = ('id', 'username')
 
 
-class Post_Saving_Serializers(serializers.ModelSerializer):
-    custom_users = CustomUserSerializers(read_only=True)
-
-    # user_name = serializers.SerializerMethodField()
-
-    # def get_user_name(self, obj):
-    #     return obj.custom_users.username
-
+class Post_Serializers(serializers.ModelSerializer):
     class Meta:
         model = Post
-        fields = '__all__'
-
-    def create(self, validated_data):
-        # get user
-        user = Custom_Users.objects.get(id=self.context['request'].user.id)
-        # create post against user
-        post_instance = Post.objects.create(custom_users=user, **validated_data)
-        return post_instance
+        exclude = ['custom_users']
 
 
 class Single_User_Search_Serializers(serializers.ModelSerializer):

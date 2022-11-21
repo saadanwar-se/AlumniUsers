@@ -18,5 +18,6 @@ urlpatterns = [
                   path('gannouncements/', views.Get_Announcments.as_view(), name='get_announcements'),
                   path('teacherregister/', views.Register_Teacher.as_view(), name='teacher_registration'),
                   path('teacherlogin/', views.Teacher_Login_Api.as_view(), name='teacher_registration'),
+                  path('allposts/', views.Posts.as_view(), name='post_saving'),
 
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -9,9 +9,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from custom_users.services import register_new_user, all_fields, register_alumni_user, generating_all_fields_for_alumni, \
     register_teacher
 from custom_users.serializers import Custom_Users_Serializers, Register_User_Serializer, Profile_Serializers, \
-    User_Search_Serializers, Post_Saving_Serializers, Registeratrion_Alumni_Teacher_Serializers, Alumni_Teacher_Login_Serializers, \
+    User_Search_Serializers, Post_Serializers, Registeratrion_Alumni_Teacher_Serializers, Alumni_Teacher_Login_Serializers, \
     Single_User_Search_Serializers, Get_Alumni_Achievements_Serializers, Get_Announcements
-from custom_users.models import Custom_Users, AlumniData, Announcements
+from custom_users.models import Custom_Users, AlumniData, Announcements, Post
 
 
 # Create your views here.
@@ -158,19 +158,21 @@ class Post_Saving(APIView):
     Saving the POSTS
     """
     authentication_classes = [JWTAuthentication]
-    parser_classes = [FormParser, MultiPartParser]
 
-    def post(self, request, format=None):
+    def post(self, request):
         try:
             data = request.data
-            serializer = Post_Saving_Serializers(data=data, context={'request': request})
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return response.Response({
-                'data': serializer.data,
-            },
-                status=status.HTTP_201_CREATED
-            )
+            serializer = Post_Serializers(data=data)
+            if serializer.is_valid(raise_exception=True):
+                Post.objects.create(
+                    custom_users=request.user,  picture=serializer.validated_data['picture'],
+                    title=serializer.validated_data['title'], description=serializer.validated_data['description']
+                )
+                return response.Response({
+                    'data': "Post created successfully."
+                },
+                    status=status.HTTP_201_CREATED
+                )
 
         except Exception as e:
             return response.Response(
@@ -295,3 +297,8 @@ class Teacher_Login_Api(APIView):
                 {'message': "Invalid credentials"},
                 status=status.HTTP_401_UNAUTHORIZED
             )
+
+
+class Posts(ListAPIView):
+    queryset = Post.objects.all()
+    serializer_class = Post_Serializers
