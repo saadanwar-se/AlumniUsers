@@ -17,7 +17,9 @@ urlpatterns = [
                   path('sannouncements/', views.Save_Announcments.as_view(), name='save_announcements'),
                   path('gannouncements/', views.Get_Announcments.as_view(), name='get_announcements'),
                   path('teacherregister/', views.Register_Teacher.as_view(), name='teacher_registration'),
-                  path('teacherlogin/', views.Teacher_Login_Api.as_view(), name='teacher_registration'),
-                  path('allposts/', views.Posts.as_view(), name='post_saving'),
+                  path('teacherlogin/', views.Teacher_Login_Api.as_view(), name='teacher_login'),
+                  path('allposts/', views.Posts.as_view(), name='fetching_all_posts'),
+                  path('fundraise/', views.Raising_Fund.as_view(), name='fund_raising'),
+                  path('delete/<str:pk>/', views.Delete_Student.as_view(), name='delete_user'),
 
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

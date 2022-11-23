@@ -49,3 +49,12 @@ class Announcements(models.Model):
     date = models.CharField(max_length=255)
     title = models.CharField(max_length=255)
     description = models.CharField(max_length=255)
+
+
+class Fund_Raise(models.Model):
+    custom_users = models.ForeignKey(Custom_Users, on_delete=models.CASCADE, related_name="teacher")
+    title = models.CharField(max_length=256)
+    description = models.CharField(max_length=256)
+    amount = models.CharField(max_length=256)
+    account_no = models.CharField(max_length=256)
+    bank_name = models.CharField(max_length=256)

@@ -1,17 +1,19 @@
 from django.contrib.auth import authenticate
 from rest_framework import response, status
 from rest_framework.filters import SearchFilter
-from rest_framework.generics import ListAPIView
-from rest_framework.parsers import FormParser, MultiPartParser
+from rest_framework.generics import ListAPIView, DestroyAPIView
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from custom_users.services import register_new_user, all_fields, register_alumni_user, generating_all_fields_for_alumni, \
     register_teacher
 from custom_users.serializers import Custom_Users_Serializers, Register_User_Serializer, Profile_Serializers, \
-    User_Search_Serializers, Post_Serializers, Registeratrion_Alumni_Teacher_Serializers, Alumni_Teacher_Login_Serializers, \
-    Single_User_Search_Serializers, Get_Alumni_Achievements_Serializers, Get_Announcements
-from custom_users.models import Custom_Users, AlumniData, Announcements, Post
+    User_Search_Serializers, Post_Serializers, Registeratrion_Alumni_Teacher_Deletion_Serializers, \
+    Alumni_Teacher_Login_Serializers, \
+    Single_User_Search_Serializers, Get_Alumni_Achievements_Serializers, Get_Announcements, Fund_Raise_Serializers, \
+    All_Posts
+from custom_users.models import Custom_Users, AlumniData, Announcements, Post, Fund_Raise
 
 
 # Create your views here.
@@ -74,6 +76,7 @@ class Student_Profile_Api(APIView):
         Updating Registered Student
     """
     authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def patch(self, request, pk):
         obj = Custom_Users.objects.get(username=pk)
@@ -94,6 +97,7 @@ class Users_Search_List(ListAPIView):
         Users Searching Api
     """
     authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     queryset = Custom_Users.objects.all()
     serializer_class = User_Search_Serializers
@@ -109,7 +113,7 @@ class Register_Alumni_Api(APIView):
     def post(self, request):
         try:
             data = request.data
-            serializer = Registeratrion_Alumni_Teacher_Serializers(data=data)
+            serializer = Registeratrion_Alumni_Teacher_Deletion_Serializers(data=data)
             if serializer.is_valid(raise_exception=True):
                 data = register_alumni_user(serializer.validated_data)
                 return data
@@ -158,6 +162,7 @@ class Post_Saving(APIView):
     Saving the POSTS
     """
     authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         try:
@@ -165,7 +170,7 @@ class Post_Saving(APIView):
             serializer = Post_Serializers(data=data)
             if serializer.is_valid(raise_exception=True):
                 Post.objects.create(
-                    custom_users=request.user,  picture=serializer.validated_data['picture'],
+                    custom_users=request.user, picture=serializer.validated_data['picture'],
                     title=serializer.validated_data['title'], description=serializer.validated_data['description']
                 )
                 return response.Response({
@@ -186,6 +191,7 @@ class Get_Single_User(APIView):
         Single User Searching
     """
     authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
         obj = Custom_Users.objects.get(id=pk)
@@ -255,7 +261,7 @@ class Register_Teacher(APIView):
     def post(self, request):
         try:
             data = request.data
-            serializer = Registeratrion_Alumni_Teacher_Serializers(data=data)
+            serializer = Registeratrion_Alumni_Teacher_Deletion_Serializers(data=data)
             if serializer.is_valid(raise_exception=True):
                 data = register_teacher(serializer.validated_data)
                 return data
@@ -299,6 +305,64 @@ class Teacher_Login_Api(APIView):
             )
 
 
-class Posts(ListAPIView):
-    queryset = Post.objects.all()
-    serializer_class = Post_Serializers
+class Posts(APIView):
+    """
+    Showing all Posts of users
+    """
+
+    def get(self, request):
+        try:
+            posts = Post.objects.all().order_by('-id')
+            serializer = All_Posts(posts, many=True, context={'request': request})
+            return response.Response({
+                'data': serializer.data
+            },
+                status=status.HTTP_200_OK
+            )
+        except Exception as e:
+            return response.Response(
+                data={'error': e},
+            )
+
+
+class Raising_Fund(APIView):
+    """
+    Saving the Raising Funds data
+    """
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            data = request.data
+            serializer = Fund_Raise_Serializers(data=data)
+            if serializer.is_valid(raise_exception=True):
+                Fund_Raise.objects.create(
+                    custom_users=request.user,
+                    title=serializer.validated_data['title'],
+                    description=serializer.validated_data['description'],
+                    amount=serializer.validated_data['amount'],
+                    account_no=serializer.validated_data['account_no'],
+                    bank_name=serializer.validated_data['bank_name'],
+                )
+                return response.Response({
+                    'message': "Fund Raising Post has been saved"
+                },
+                    status=status.HTTP_201_CREATED
+                )
+
+        except Exception as e:
+            return response.Response(
+                data={'error': e},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+
+class Delete_Student(DestroyAPIView):
+    """
+    Deleting the user who violates the rules
+    """
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    queryset = Custom_Users.objects.all()
+    serializer_class = Registeratrion_Alumni_Teacher_Deletion_Serializers

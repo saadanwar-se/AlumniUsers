@@ -1,18 +1,12 @@
 from rest_framework import serializers
 from rest_framework.fields import CurrentUserDefault
 
-from custom_users.models import Custom_Users, Post, AlumniData, Announcements
+from custom_users.models import Custom_Users, Post, AlumniData, Announcements, Fund_Raise
 
 
 class Custom_Users_Serializers(serializers.Serializer):
     roll_no = serializers.CharField()
     password = serializers.CharField()
-
-
-class Post_Saving_User(serializers.ModelSerializer):
-    class Meta:
-        model = Custom_Users
-        fields = '__all__'
 
 
 class Alumni_Teacher_Login_Serializers(serializers.Serializer):
@@ -40,7 +34,7 @@ class User_Search_Serializers(serializers.ModelSerializer):
         exclude = ('password',)
 
 
-class Registeratrion_Alumni_Teacher_Serializers(serializers.ModelSerializer):
+class Registeratrion_Alumni_Teacher_Deletion_Serializers(serializers.ModelSerializer):
     class Meta:
         model = Custom_Users
         fields = '__all__'
@@ -74,3 +68,33 @@ class Get_Announcements(serializers.ModelSerializer):
     class Meta:
         model = Announcements
         fields = '__all__'
+
+
+class Fund_Raise_Serializers(serializers.ModelSerializer):
+    class Meta:
+        model = Fund_Raise
+        exclude = ['custom_users']
+
+
+class Owners(serializers.ModelSerializer):
+    class Meta:
+        model = Custom_Users
+        fields = '__all__'
+
+
+class All_Posts(serializers.ModelSerializer):
+    custom_users = Owners(read_only=True)
+    picture_url = serializers.SerializerMethodField(method_name='get_picture_url')
+
+    class Meta:
+        model = Post
+        exclude = ['picture']
+        # fields = ['custom_users', 'picture', 'title', 'description']
+
+    def get_picture_url(self, post):
+        request = self.context.get('request')
+        if not post.picture:
+            return ""
+        else:
+            picture_url = post.picture.url
+            return request.build_absolute_uri(picture_url)
