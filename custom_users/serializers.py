@@ -23,9 +23,12 @@ class Register_User_Serializer(serializers.Serializer):
 
 
 class Profile_Serializers(serializers.ModelSerializer):
+
     class Meta:
         model = Custom_Users
-        exclude = ("password", "role",)
+        fields = ("picture", "email", "phone_number", "bio", "social_github",
+                  "social_linkedin", "social_website", "social_twitter", "social_youtube",
+                  "instagram",)
 
 
 class User_Search_Serializers(serializers.ModelSerializer):
@@ -38,6 +41,12 @@ class Registeratrion_Alumni_Teacher_Deletion_Serializers(serializers.ModelSerial
     class Meta:
         model = Custom_Users
         fields = '__all__'
+
+
+class Registeratrion_Alumni_Teacher(serializers.ModelSerializer):
+    class Meta:
+        model = Custom_Users
+        exclude = ("picture",)
 
 
 class CustomUserSerializers(serializers.ModelSerializer):
@@ -98,3 +107,10 @@ class All_Posts(serializers.ModelSerializer):
         else:
             picture_url = post.picture.url
             return request.build_absolute_uri(picture_url)
+
+
+class Student_Block_Serializers(serializers.ModelSerializer):
+    class Meta:
+        model = Custom_Users
+        fields = ("is_blocked",)
+

@@ -1,5 +1,4 @@
 import uuid
-
 from custom_users.models import Custom_Users
 from rest_framework import response, status
 
@@ -31,7 +30,6 @@ def register_new_user(data):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
-
 def all_fields(user):
     """
     Returning All Fields Of Login User
@@ -41,7 +39,6 @@ def all_fields(user):
         "first_name": user.first_name,
         "last_name": user.last_name,
         "email": user.email,
-        "short_intro": user.short_intro,
         "bio": user.bio,
         "social_github": user.social_github,
         "social_linkedin": user.social_linkedin,
@@ -51,6 +48,46 @@ def all_fields(user):
         "role": user.role,
     }
     return data
+
+def all_fields_patch(user):
+    """
+    Returning All Fields Of Student for patch request
+    """
+    if not user.picture:
+        data = {
+            "roll_no": user.username,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email,
+            "bio": user.bio,
+            "social_github": user.social_github,
+            "social_linkedin": user.social_linkedin,
+            "social_twitter": user.social_twitter,
+            "social_youtube": user.social_youtube,
+            "social_website": user.social_website,
+            "role": user.role,
+        }
+        return data
+    else:
+        BaseUrl = "http://127.0.0.1:8000"
+        image_url = user.picture.url
+        url = BaseUrl + str(image_url)
+        data = {
+            "roll_no": user.username,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email,
+            "bio": user.bio,
+            "social_github": user.social_github,
+            "social_linkedin": user.social_linkedin,
+            "social_twitter": user.social_twitter,
+            "social_youtube": user.social_youtube,
+            "social_website": user.social_website,
+            "role": user.role,
+            "phone_number": user.phone_number,
+            "picture": url
+        }
+        return data
 
 
 def generating_uuid():
@@ -72,7 +109,6 @@ def generating_dict_for_alumni(data):
         "first_name": data['first_name'],
         "last_name": data['last_name'],
         "email": data['email'],
-        "short_intro": data['short_intro'],
         "bio": data['bio'],
         "social_github": data['social_github'],
         "social_linkedin": data['social_linkedin'],
@@ -81,7 +117,6 @@ def generating_dict_for_alumni(data):
         "social_website": data['social_website'],
         "company_name": data['company_name'],
         "designation": data['designation'],
-        "is_alumni": data['is_alumni'],
         "role": data['role']
     }
     return dict_for_alumni
@@ -132,7 +167,6 @@ def generating_dict_for_teacher(data):
         "first_name": data['first_name'],
         "last_name": data['last_name'],
         "email": data['email'],
-        "short_intro": data['short_intro'],
         "bio": data['bio'],
         "social_github": data['social_github'],
         "social_linkedin": data['social_linkedin'],
@@ -141,7 +175,6 @@ def generating_dict_for_teacher(data):
         "social_website": data['social_website'],
         "company_name": data['company_name'],
         "designation": data['designation'],
-        "is_teacher": data['is_teacher'],
         "role": data['role']
     }
     return dict_for_alumni
@@ -156,7 +189,6 @@ def generating_all_fields_for_alumni(alumni):
         "first_name": alumni.first_name,
         "last_name": alumni.last_name,
         "email": alumni.email,
-        "short_intro": alumni.short_intro,
         "bio": alumni.bio,
         "social_github": alumni.social_github,
         "social_linkedin": alumni.social_linkedin,
@@ -164,7 +196,6 @@ def generating_all_fields_for_alumni(alumni):
         "social_youtube": alumni.social_youtube,
         "social_website": alumni.social_website,
         "role": alumni.role,
-        "is_alumni": alumni.is_alumni,
     }
     return data
 

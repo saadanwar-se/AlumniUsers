@@ -7,21 +7,21 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from custom_users.services import register_new_user, all_fields, register_alumni_user, generating_all_fields_for_alumni, \
-    register_teacher
+    register_teacher, all_fields_patch
 from custom_users.serializers import Custom_Users_Serializers, Register_User_Serializer, Profile_Serializers, \
     User_Search_Serializers, Post_Serializers, Registeratrion_Alumni_Teacher_Deletion_Serializers, \
     Alumni_Teacher_Login_Serializers, \
     Single_User_Search_Serializers, Get_Alumni_Achievements_Serializers, Get_Announcements, Fund_Raise_Serializers, \
-    All_Posts
+    All_Posts, Student_Block_Serializers,Registeratrion_Alumni_Teacher
 from custom_users.models import Custom_Users, AlumniData, Announcements, Post, Fund_Raise
-
+from .custompermissions import BlockUser
 
 # Create your views here.
 
 
 class Student_Register(APIView):
     """
-    Register New Student
+    Register University Student
     """
 
     def post(self, request):
@@ -41,7 +41,7 @@ class Student_Register(APIView):
 
 class Student_Login_Api(APIView):
     """
-    Student Login
+    University Student Login
     """
 
     def post(self, request):
@@ -64,32 +64,37 @@ class Student_Login_Api(APIView):
                 },
                     status=status.HTTP_200_OK
                 )
-        except:
+        except Exception as e:
             return response.Response(
-                {'message': "Invalid credentials"},
-                status=status.HTTP_401_UNAUTHORIZED
+                {'message': serializer.errors},
             )
 
 
 class Student_Profile_Api(APIView):
     """
-        Updating Registered Student
+        Updating the Registered University Student
     """
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, BlockUser]
 
     def patch(self, request, pk):
-        obj = Custom_Users.objects.get(username=pk)
-        serializer = Profile_Serializers(obj, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return response.Response({
-                'data': 'The User has been successfully data in User Profile',
-            },
-                status=status.HTTP_201_CREATED
+        try:
+            instance = Custom_Users.objects.get(username=pk)
+            serializer = Profile_Serializers(instance, data=request.data)
+            if serializer.is_valid(raise_exception=True):
+                Custom_Users.objects.filter(username=pk).update(**serializer.validated_data)
+                obj = Custom_Users.objects.get(username=pk)
+                data = all_fields_patch(obj)
+                return response.Response({
+                    'message': 'The User has been successfully Updated',
+                    'data': data,
+                },
+                    status=status.HTTP_201_CREATED
+                )
+        except Exception as e:
+            return response.Response(
+                {"message":e},
             )
-        else:
-            return response.Response(serializer.errors)
 
 
 class Users_Search_List(ListAPIView):
@@ -97,7 +102,7 @@ class Users_Search_List(ListAPIView):
         Users Searching Api
     """
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, BlockUser]
 
     queryset = Custom_Users.objects.all()
     serializer_class = User_Search_Serializers
@@ -113,7 +118,7 @@ class Register_Alumni_Api(APIView):
     def post(self, request):
         try:
             data = request.data
-            serializer = Registeratrion_Alumni_Teacher_Deletion_Serializers(data=data)
+            serializer = Registeratrion_Alumni_Teacher(data=data)
             if serializer.is_valid(raise_exception=True):
                 data = register_alumni_user(serializer.validated_data)
                 return data
@@ -150,10 +155,10 @@ class Alumni_Login_Api(APIView):
                 },
                     status=status.HTTP_200_OK
                 )
-        except:
+        except Exception as e:
             return response.Response(
-                {'message': "Invalid credentials"},
-                status=status.HTTP_401_UNAUTHORIZED
+                data={'error': e},
+                status=status.HTTP_400_BAD_REQUEST
             )
 
 
@@ -162,7 +167,7 @@ class Post_Saving(APIView):
     Saving the POSTS
     """
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, BlockUser]
 
     def post(self, request):
         try:
@@ -191,7 +196,7 @@ class Get_Single_User(APIView):
         Single User Searching
     """
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, BlockUser]
 
     def get(self, request, pk):
         obj = Custom_Users.objects.get(id=pk)
@@ -261,7 +266,7 @@ class Register_Teacher(APIView):
     def post(self, request):
         try:
             data = request.data
-            serializer = Registeratrion_Alumni_Teacher_Deletion_Serializers(data=data)
+            serializer = Registeratrion_Alumni_Teacher(data=data)
             if serializer.is_valid(raise_exception=True):
                 data = register_teacher(serializer.validated_data)
                 return data
@@ -309,6 +314,8 @@ class Posts(APIView):
     """
     Showing all Posts of users
     """
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         try:
@@ -366,3 +373,48 @@ class Delete_Student(DestroyAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Custom_Users.objects.all()
     serializer_class = Registeratrion_Alumni_Teacher_Deletion_Serializers
+
+
+class Block_Student(APIView):
+    """
+        Blocking the University Student
+    """
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, pk):
+        try:
+            instance = Custom_Users.objects.get(username=pk)
+            serializer = Student_Block_Serializers(instance, data=request.data)
+            if serializer.is_valid(raise_exception=True):
+                serializer.save()
+                return response.Response({
+                    'message': 'The User has been succesfully blocked',
+                },
+                    status=status.HTTP_200_OK
+                )
+        except Exception as e:
+            return response.Response(
+                {"message": e},
+            )
+
+
+class All_FundsRaise_Post(APIView):
+    """
+    Showing all Posts of Fund Raising
+    """
+
+
+    def get(self, request):
+        try:
+            posts = Fund_Raise.objects.all().order_by('-id')
+            serializer = Fund_Raise_Serializers(posts, many=True)
+            return response.Response({
+                'data': serializer.data
+            },
+                status=status.HTTP_200_OK
+            )
+        except Exception as e:
+            return response.Response(
+                data={'error': e},
+            )

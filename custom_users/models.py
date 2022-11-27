@@ -6,15 +6,17 @@ from django.contrib.auth.models import AbstractUser
 
 class Custom_Users(AbstractUser):
     username = models.CharField(max_length=100, null=True, blank=True, unique=True)
+    picture = models.ImageField(upload_to="my_picture")
     email = models.EmailField(max_length=200, null=True, blank=True)
     name = models.CharField(max_length=255, null=True, blank=True)
-    short_intro = models.CharField(max_length=200, null=True, blank=True)
+    phone_number = models.CharField(max_length=200, null=True, blank=True)
     bio = models.TextField(blank=True, null=True)
     social_github = models.CharField(max_length=200, null=True, blank=True)
     social_linkedin = models.CharField(max_length=200, null=True, blank=True)
     social_twitter = models.CharField(max_length=200, null=True, blank=True)
     social_youtube = models.CharField(max_length=200, null=True, blank=True)
     social_website = models.CharField(max_length=200, null=True, blank=True)
+    instagram = models.CharField(max_length=200, null=True, blank=True)
     choices = (
         ("ADMIN", 'ADMIN'),
         ("TEACHER", 'TEACHER'),
@@ -22,11 +24,12 @@ class Custom_Users(AbstractUser):
         ("ALUMNI", 'ALUMNI')
     )
     role = models.CharField(max_length=50, choices=choices, blank=True, null=True)
-    is_alumni = models.BooleanField(default=False, null=True, blank=True)
-    is_teacher = models.BooleanField(default=False, null=True, blank=True)
     uuid = models.CharField(max_length=13, unique=True, editable=False, null=True, blank=True)
     company_name = models.CharField(max_length=50, null=True, blank=True)
     designation = models.CharField(max_length=256, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    is_blocked = models.BooleanField(default=False)
+
 
     def __str__(self):
         return self.name
