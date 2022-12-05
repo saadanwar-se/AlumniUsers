@@ -1,6 +1,4 @@
 from rest_framework import serializers
-from rest_framework.fields import CurrentUserDefault
-
 from custom_users.models import Custom_Users, Post, AlumniData, Announcements, Fund_Raise
 
 
@@ -23,10 +21,9 @@ class Register_User_Serializer(serializers.Serializer):
 
 
 class Profile_Serializers(serializers.ModelSerializer):
-
     class Meta:
         model = Custom_Users
-        fields = ("picture", "email", "phone_number", "bio", "social_github",
+        fields = ("email", "phone_number", "bio", "social_github",
                   "social_linkedin", "social_website", "social_twitter", "social_youtube",
                   "instagram",)
 

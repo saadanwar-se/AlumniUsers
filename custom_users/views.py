@@ -52,18 +52,25 @@ class Student_Login_Api(APIView):
                 roll_no = serializer.validated_data['roll_no']
                 password = serializer.validated_data['password']
                 user = authenticate(username=roll_no, password=password)
-                data = all_fields(user)
-                refresh_token = RefreshToken.for_user(user)
-                token = str(refresh_token.access_token)
-                refresh_token = str(refresh_token)
+                if user.is_blocked != True:
+                    data = all_fields(user)
+                    refresh_token = RefreshToken.for_user(user)
+                    token = str(refresh_token.access_token)
+                    refresh_token = str(refresh_token)
 
-                return response.Response({
-                    'token': token,
-                    'refresh_token': refresh_token,
-                    'data': data,
-                },
-                    status=status.HTTP_200_OK
-                )
+                    return response.Response({
+                        'token': token,
+                        'refresh_token': refresh_token,
+                        'data': data,
+                    },
+                        status=status.HTTP_200_OK
+                    )
+                else:
+                    return response.Response({
+                        "message":"user is blocked"
+                    },
+                        status=status.HTTP_406_NOT_ACCEPTABLE
+                    )
         except Exception as e:
             return response.Response(
                 {'message': serializer.errors},
@@ -367,7 +374,7 @@ class Raising_Fund(APIView):
 
 class Delete_Student(DestroyAPIView):
     """
-    Deleting the user who violates the rules
+    Deleting the Student who violates the rules
     """
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]

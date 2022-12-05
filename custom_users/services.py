@@ -30,6 +30,7 @@ def register_new_user(data):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
+
 def all_fields(user):
     """
     Returning All Fields Of Login User
@@ -45,49 +46,32 @@ def all_fields(user):
         "social_twitter": user.social_twitter,
         "social_youtube": user.social_youtube,
         "social_website": user.social_website,
+        "phone_number": user.phone_number,
         "role": user.role,
     }
     return data
+
 
 def all_fields_patch(user):
     """
     Returning All Fields Of Student for patch request
     """
-    if not user.picture:
-        data = {
-            "roll_no": user.username,
-            "first_name": user.first_name,
-            "last_name": user.last_name,
-            "email": user.email,
-            "bio": user.bio,
-            "social_github": user.social_github,
-            "social_linkedin": user.social_linkedin,
-            "social_twitter": user.social_twitter,
-            "social_youtube": user.social_youtube,
-            "social_website": user.social_website,
-            "role": user.role,
-        }
-        return data
-    else:
-        BaseUrl = "http://127.0.0.1:8000"
-        image_url = user.picture.url
-        url = BaseUrl + str(image_url)
-        data = {
-            "roll_no": user.username,
-            "first_name": user.first_name,
-            "last_name": user.last_name,
-            "email": user.email,
-            "bio": user.bio,
-            "social_github": user.social_github,
-            "social_linkedin": user.social_linkedin,
-            "social_twitter": user.social_twitter,
-            "social_youtube": user.social_youtube,
-            "social_website": user.social_website,
-            "role": user.role,
-            "phone_number": user.phone_number,
-            "picture": url
-        }
-        return data
+    data = {
+        "roll_no": user.username,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "email": user.email,
+        "bio": user.bio,
+        "social_github": user.social_github,
+        "social_linkedin": user.social_linkedin,
+        "social_twitter": user.social_twitter,
+        "social_youtube": user.social_youtube,
+        "social_website": user.social_website,
+        "role": user.role,
+        "phone_number": user.phone_number,
+        "instagram": user.instagram
+    }
+    return data
 
 
 def generating_uuid():
