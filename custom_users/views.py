@@ -88,16 +88,16 @@ class Student_Profile_Api(APIView):
         try:
             instance = Custom_Users.objects.get(username=pk)
             serializer = Profile_Serializers(instance, data=request.data)
-            if serializer.is_valid(raise_exception=True):
-                Custom_Users.objects.filter(username=pk).update(**serializer.validated_data)
-                obj = Custom_Users.objects.get(username=pk)
-                data = all_fields_patch(obj)
-                return response.Response({
-                    'message': 'The User has been successfully Updated',
-                    'data': data,
-                },
-                    status=status.HTTP_201_CREATED
-                )
+            serializer.is_valid()
+            Custom_Users.objects.filter(username=pk).update(**serializer.validated_data)
+            obj = Custom_Users.objects.get(username=pk)
+            data = all_fields_patch(obj)
+            return response.Response({
+                'message': 'The User has been successfully Updated',
+                'data': data,
+            },
+                status=status.HTTP_201_CREATED
+            )
         except Exception as e:
             return response.Response(
                 {"message":e},
@@ -410,7 +410,6 @@ class All_FundsRaise_Post(APIView):
     """
     Showing all Posts of Fund Raising
     """
-
 
     def get(self, request):
         try:
